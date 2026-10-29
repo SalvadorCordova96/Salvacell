@@ -1,0 +1,15 @@
+# Proyecto independiente; conservar versiones fijas del archivo de bloqueo.
+trustLockfile: true
+allowBuilds:
+  esbuild: true
+  fsevents: true
+  sharp: true
+  unrs-resolver: true
+  workerd: true
+storeDir: .pnpm-store
+cacheDir: .pnpm-store/policy-cache
+enableGlobalVirtualStore: false
+# Reuse store files with clones or hardlinks before falling back to copies.
+packageImportMethod: auto
+overrides:
+  miniflare>sharp: 0.35.4

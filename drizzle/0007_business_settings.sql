@@ -1,0 +1,14 @@
+ALTER TABLE settings ADD COLUMN phone TEXT NOT NULL DEFAULT '686 226 2377';
+ALTER TABLE settings ADD COLUMN whatsapp TEXT NOT NULL DEFAULT '';
+ALTER TABLE settings ADD COLUMN address TEXT NOT NULL DEFAULT '';
+ALTER TABLE settings ADD COLUMN city TEXT NOT NULL DEFAULT 'Mexicali, Baja California';
+ALTER TABLE settings ADD COLUMN timezone TEXT NOT NULL DEFAULT 'America/Tijuana';
+ALTER TABLE settings ADD COLUMN ticket_order_note TEXT NOT NULL DEFAULT 'Conserva este ticket para recoger tu equipo.';
+ALTER TABLE settings ADD COLUMN ticket_payment_note TEXT NOT NULL DEFAULT 'Gracias por tu pago.';
+ALTER TABLE settings ADD COLUMN ticket_sale_note TEXT NOT NULL DEFAULT 'Gracias por tu compra.';
+ALTER TABLE settings ADD COLUMN ticket_paper_mm INTEGER NOT NULL DEFAULT 58;
+ALTER TABLE settings ADD COLUMN low_stock_threshold INTEGER NOT NULL DEFAULT 3;
+ALTER TABLE settings ADD COLUMN quote_stale_days INTEGER NOT NULL DEFAULT 30;
+ALTER TABLE settings ADD COLUMN folio_prefix_order TEXT NOT NULL DEFAULT 'SC';
+ALTER TABLE settings ADD COLUMN folio_prefix_quote TEXT NOT NULL DEFAULT 'PR';
+ALTER TABLE settings ADD COLUMN folio_prefix_sale TEXT NOT NULL DEFAULT 'VTA';

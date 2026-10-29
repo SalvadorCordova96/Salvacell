@@ -1,0 +1,31 @@
+.quotes-panel{min-width:0}
+.quotes-tools{align-items:center}
+.quotes-tools .search{flex:1 1 260px;max-width:380px}
+.quotes-filter{display:inline-flex;flex:0 0 auto;gap:3px;max-width:100%;overflow-x:auto;padding:4px;border:1px solid var(--line);border-radius:9px;background:var(--surface-muted)}
+.quotes-filter [role=radio]{display:inline-flex;min-height:32px;align-items:center;justify-content:center;padding:7px 11px;border:0;border-radius:6px;background:transparent;color:var(--muted);font-size:12px;line-height:1.2;white-space:nowrap}
+.quotes-filter [role=radio][aria-checked=true],.quotes-filter [role=radio][aria-pressed=true],.quotes-filter [role=radio][data-selected=true]{background:color-mix(in srgb,var(--accent) 14%,var(--surface));color:var(--accent);font-weight:650}
+.quotes-filter [role=radio]:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.quotes-row-actions{white-space:nowrap}
+.quote-order-link{display:inline-flex;min-height:32px;align-items:center;justify-content:center;gap:5px;padding:5px 9px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--accent);font-size:12px;font-weight:650}
+.quote-order-link:hover{background:var(--surface-muted)}
+.quotes-mobile-list{display:none}
+.quotes-foot{justify-content:flex-end;color:var(--muted);font-size:12px}
+@media(max-width:680px){
+ .quotes-tools{align-items:stretch}
+ .quotes-filter{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible}
+ .quotes-filter [role=radio]{min-width:0;justify-content:center;padding-inline:7px;font-size:12px}
+ .quotes-desktop-table{display:none}
+ .quotes-mobile-list{display:grid;gap:9px;padding:11px}
+ .quote-mobile-row{display:grid;gap:9px;min-width:0;padding:11px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+ .quote-mobile-open{display:flex;align-items:center;gap:9px;min-width:0;padding:0;background:transparent;color:var(--ink);text-align:left}
+ .quote-mobile-open:focus-visible,.quote-order-link:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+ .quote-mobile-icon{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border-radius:7px;background:color-mix(in srgb,var(--accent) 12%,var(--surface));color:var(--accent)}
+ .quote-mobile-main{display:grid;flex:1 1 auto;min-width:0;gap:3px}
+ .quote-mobile-main strong,.quote-mobile-main small{overflow-wrap:anywhere}
+ .quote-mobile-main strong{font-size:13px;line-height:1.35}
+ .quote-mobile-main small{color:var(--muted);font-size:11px;line-height:1.35}
+ .quote-mobile-open>.sc-badge{max-width:88px;white-space:normal;text-align:center}
+ .quote-mobile-meta{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-left:43px;color:var(--muted);font-size:11px}
+ .quote-mobile-meta strong{color:var(--ink);font-size:13px;font-variant-numeric:tabular-nums}
+ .quote-mobile-row>.quote-order-link{justify-self:start;margin-left:43px}
+}

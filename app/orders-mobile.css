@@ -1,0 +1,30 @@
+.orders-mobile-list{display:none}
+.orders-mobile-sort{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.orders-mobile-sort label{color:var(--muted);font-size:12px}
+.orders-mobile-sort select{min-width:0;flex:1;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font-size:12px}
+.orders-mobile-accordion{display:grid;gap:0}
+.orders-mobile-accordion .accordion__item{border-bottom:1px solid var(--line)}
+.orders-mobile-accordion .accordion__item:last-child{border-bottom:0}
+.orders-mobile-accordion .accordion__trigger{display:flex;width:100%;min-height:68px;align-items:center;gap:9px;padding:10px 12px;text-align:left;color:var(--ink)}
+.orders-mobile-accordion .accordion__trigger:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.orders-mobile-summary{display:flex;flex:1;min-width:0;align-items:center;justify-content:space-between;gap:8px}
+.orders-mobile-summary>span:first-child{display:grid;min-width:0;gap:4px}
+.orders-mobile-summary>span:first-child strong{font-size:12px;color:var(--accent)}
+.orders-mobile-summary small{overflow:hidden;color:var(--muted);font-size:12px;text-overflow:ellipsis;white-space:nowrap}
+.orders-mobile-summary-meta{display:grid;justify-items:end;gap:5px;flex:0 0 auto}
+.orders-mobile-summary-meta>strong{font-size:12px;font-variant-numeric:tabular-nums}
+.orders-mobile-accordion .accordion__indicator{display:flex;flex:0 0 auto;color:var(--muted);transition:transform .18s ease}
+.orders-mobile-accordion [aria-expanded=true] .accordion__indicator{transform:rotate(180deg);color:var(--accent)}
+.orders-mobile-accordion .accordion__panel{border-top:1px solid var(--line);background:color-mix(in srgb,var(--surface-muted) 55%,var(--surface))}
+.orders-mobile-accordion .accordion__body{display:grid;gap:12px;padding:12px}
+.orders-mobile-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;margin:0}
+.orders-mobile-details>div{min-width:0}
+.orders-mobile-details dt{margin-bottom:3px;color:var(--muted);font-size:10px;font-weight:650;letter-spacing:.04em;text-transform:uppercase}
+.orders-mobile-details dd{margin:0;color:var(--ink);font-size:12px;overflow-wrap:anywhere}
+.orders-mobile-open{display:flex;width:100%;align-items:center;justify-content:center;gap:5px}
+@media(max-width:700px){
+ .orders-desktop-table{display:none}
+ .orders-mobile-list{display:block}
+ .orders-sort-hint{display:none}
+ .orders-mobile-sort .sc-button{white-space:nowrap}
+}

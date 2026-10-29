@@ -1,0 +1,207 @@
+services:
+  salvacel-postgres:
+    image: postgres:17.6-bookworm
+    container_name: salvacel-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: salvacel
+      POSTGRES_USER: salvacel
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    secrets:
+      - postgres_password
+    volumes:
+      - salvacel-postgres-data:/var/lib/postgresql/data
+    networks:
+      - isolated
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 15s
+    mem_limit: 768m
+    cpus: 1.0
+
+  salvacel:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    image: salvacel-local:safe
+    container_name: salvacel-local
+    restart: unless-stopped
+    depends_on:
+      salvacel-postgres:
+        condition: service_healthy
+    environment:
+      SALVACEL_HOST: 0.0.0.0
+      PGHOST: salvacel-postgres
+      PGPORT: "5432"
+      PGDATABASE: salvacel
+      PGUSER: salvacel
+      PGPASSWORD_FILE: /run/secrets/postgres_password
+      PG_POOL_MAX: "10"
+      SALVACEL_AGENT_INGRESS_TOKEN_FILE: /run/secrets/salvacel_agent_ingress_token
+      SALVACEL_AGENT_PROCESSING_ENABLED: "true"
+      SALVACEL_OPERATOR_CHAT_ENABLED: "true"
+      OPENCLAW_HOOK_TOKEN_FILE: /run/secrets/openclaw_hook_token
+      OPENCLAW_HOOK_URL: http://salvacel-openclaw-gateway:18789/hooks/agent
+      OPENCLAW_AGENT_ID: salvacel-supplier-replies
+      OPENCLAW_OPERATOR_CHAT_AGENT_ID: salvacel-operator-chat
+      SALVACEL_OPERATOR_CHAT_TOKEN_FILE: /run/secrets/salvacel_operator_chat_token
+      SALVACEL_PHOTO_STORAGE_DIR: /var/lib/salvacel/photos
+      SALVACEL_PHOTO_MAX_STORAGE_BYTES: ${SALVACEL_PHOTO_MAX_STORAGE_BYTES:-5368709120}
+      SALVACEL_PHOTO_MOBILE_ORIGIN: ${SALVACEL_PHOTO_MOBILE_ORIGIN:-}
+    secrets:
+      - postgres_password
+      - salvacel_agent_ingress_token
+      - openclaw_hook_token
+      - salvacel_operator_chat_token
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    mem_limit: 1g
+    cpus: 1.5
+    networks:
+      - isolated
+      - agent_link
+      - photo_link
+    volumes:
+      - salvacel-photo-data:/var/lib/salvacel/photos
+    tmpfs:
+      - /tmp:rw,nosuid,size=128m,uid=1000,gid=1000
+      - /app/.local-config:rw,noexec,nosuid,size=16m,uid=1000,gid=1000
+      - /app/.wrangler/logs:rw,noexec,nosuid,size=64m,uid=1000,gid=1000
+      - /app/dist/server/.wrangler:rw,noexec,nosuid,size=128m,uid=1000,gid=1000
+      - /app/.next/cache:rw,noexec,nosuid,size=128m,uid=1000,gid=1000
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:8787/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 45s
+
+  loopback-gateway:
+    image: nginx:1.29.5-alpine
+    container_name: salvacel-loopback
+    restart: unless-stopped
+    depends_on:
+      salvacel:
+        condition: service_healthy
+    user: "101:101"
+    entrypoint:
+      - nginx
+      - -g
+      - daemon off;
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 64
+    mem_limit: 96m
+    cpus: 0.5
+    ports:
+      - "127.0.0.1:8787:8080"
+    networks:
+      - isolated
+      - edge
+    volumes:
+      - ./nginx.local.conf:/etc/nginx/nginx.conf:ro
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m,uid=101,gid=101
+      - /var/cache/nginx:rw,noexec,nosuid,size=16m,uid=101,gid=101
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --output-document=-
+        - http://127.0.0.1:8080/api/health
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 10s
+
+  photo-mobile-ingress:
+    image: nginx:1.29.5-alpine
+    container_name: salvacel-photo-mobile
+    profiles: ["photos-mobile"]
+    restart: unless-stopped
+    depends_on:
+      salvacel:
+        condition: service_healthy
+    user: "101:101"
+    entrypoint:
+      - nginx
+      - -g
+      - daemon off;
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 32
+    mem_limit: 48m
+    cpus: 0.25
+    ports:
+      - "${SALVACEL_PHOTO_BIND_IP:-127.0.0.1}:${SALVACEL_PHOTO_PORT:-8788}:8443"
+    networks:
+      - photo_link
+    volumes:
+      - ./nginx.photos-mobile.conf:/etc/nginx/nginx.conf:ro
+      - type: bind
+        source: ./.local-secrets/photo-tls
+        target: /etc/nginx/tls
+        read_only: true
+        bind:
+          create_host_path: false
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=8m,uid=101,gid=101
+      - /var/cache/nginx:rw,noexec,nosuid,size=8m,uid=101,gid=101
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --no-check-certificate
+        - --quiet
+        - --output-document=-
+        - https://127.0.0.1:8443/mobile-photos.html
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+networks:
+  isolated:
+    internal: true
+  edge:
+
+  agent_link:
+    name: salvacel-agent-link
+    external: true
+  photo_link:
+    name: salvacel-photo-link
+    internal: true
+
+volumes:
+  salvacel-data:
+  salvacel-postgres-data:
+  salvacel-photo-data:
+
+secrets:
+  postgres_password:
+    file: ./.local-secrets/postgres_password
+  salvacel_agent_ingress_token:
+    file: ../../Salvacel-OpenClaw/.local-secrets/salvacel_agent_ingress_token
+  openclaw_hook_token:
+    file: ../../Salvacel-OpenClaw/.local-secrets/openclaw_hook_token
+  salvacel_operator_chat_token:
+    file: ../../Salvacel-OpenClaw/.local-secrets/salvacel_operator_chat_token

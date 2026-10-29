@@ -1,0 +1,28 @@
+.catalog-mobile-list{display:none}
+.catalog-mobile-summary{display:flex;flex:1;min-width:0;align-items:center;justify-content:space-between;gap:10px}
+.catalog-mobile-summary>span:first-child{display:grid;min-width:0;gap:4px}
+.catalog-mobile-summary>span:first-child strong{color:var(--ink);font-size:13px;line-height:1.4;overflow-wrap:anywhere}
+.catalog-mobile-summary>span:first-child small{color:var(--muted);font-size:11px;line-height:1.4;overflow-wrap:anywhere}
+.catalog-mobile-meta{display:grid;flex:0 0 auto;justify-items:end;gap:4px}
+.catalog-mobile-meta strong{color:var(--accent);font-size:12px;font-variant-numeric:tabular-nums}
+.catalog-mobile-meta small{font-size:11px;font-variant-numeric:tabular-nums}
+.catalog-mobile-list .accordion__item{border-bottom:1px solid var(--line)}
+.catalog-mobile-list .accordion__item:last-child{border-bottom:0}
+.catalog-mobile-list .accordion__heading{margin:0}
+.catalog-mobile-list .accordion__trigger{display:flex;width:100%;min-height:60px;align-items:center;gap:8px;padding:9px 12px;text-align:left}
+.catalog-mobile-list .accordion__trigger:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.catalog-mobile-list .accordion__indicator{display:flex;flex:0 0 auto;color:var(--muted);transition:transform .18s ease}
+.catalog-mobile-list [aria-expanded=true] .accordion__indicator{transform:rotate(180deg);color:var(--accent)}
+.catalog-mobile-list .accordion__panel{border-top:1px solid var(--line);background:color-mix(in srgb,var(--surface-muted) 55%,var(--surface))}
+.catalog-mobile-list .accordion__body{display:grid;gap:12px;padding:12px}
+.catalog-mobile-details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0}
+.catalog-mobile-details>div{display:grid;min-width:0;gap:4px;align-content:start}
+.catalog-mobile-details dt{color:var(--muted);font-size:10px;font-weight:650;letter-spacing:.03em;text-transform:uppercase}
+.catalog-mobile-details dd{margin:0;color:var(--ink);font-size:11px;overflow-wrap:anywhere}
+.catalog-mobile-details .sc-badge{justify-self:start;padding:3px 6px;font-size:10px}
+.catalog-mobile-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding-top:9px;border-top:1px solid var(--line)}
+.catalog-mobile-actions .sc-button{margin-right:auto}
+@media(max-width:700px){
+ .catalog-desktop-list{display:none}
+ .catalog-mobile-list{display:block}
+}

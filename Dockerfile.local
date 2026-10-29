@@ -1,0 +1,49 @@
+# syntax=docker/dockerfile:1.7
+
+FROM node:24.19.0-bookworm-slim AS pnpm-base
+
+ENV COREPACK_HOME=/corepack
+RUN corepack enable && corepack install --global pnpm@11.25.0
+
+WORKDIR /app
+
+FROM pnpm-base AS dependency-cache
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+RUN pnpm fetch --frozen-lockfile --ignore-scripts
+
+FROM pnpm-base AS build
+
+ENV CI=true \
+    HOME=/tmp/home \
+    XDG_CONFIG_HOME=/tmp/config \
+    WRANGLER_SEND_METRICS=false \
+    CLOUDFLARE_CF_FETCH_ENABLED=false
+
+COPY --from=dependency-cache /app/.pnpm-store /app/.pnpm-store
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+RUN --network=none pnpm install --offline --frozen-lockfile
+
+COPY . .
+RUN --network=none pnpm build
+RUN rm -rf /app/.pnpm-store
+
+FROM pnpm-base AS runtime
+
+ENV NODE_ENV=production \
+    HOME=/tmp/home \
+    XDG_CONFIG_HOME=/app/.local-config \
+    NEXT_TELEMETRY_DISABLED=1
+
+COPY --from=build --chown=node:node /app /app
+
+RUN mkdir -p /app/.local-config /app/.next/cache /tmp/home \
+    /var/lib/salvacel/photos \
+    && chown -R node:node /app/.local-config /app/.next /tmp/home \
+    && chown node:node /var/lib/salvacel/photos \
+    && chmod 0700 /var/lib/salvacel/photos
+
+USER node
+EXPOSE 8787
+
+CMD ["sh", "-c", "pnpm db:migrate && exec node scripts/run-local.mjs start"]

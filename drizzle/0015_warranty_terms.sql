@@ -1,0 +1,1 @@
+ALTER TABLE settings ADD COLUMN warranty_terms TEXT NOT NULL DEFAULT '';

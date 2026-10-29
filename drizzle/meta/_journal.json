@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1791405510619,
+      "tag": "0000_exotic_trauma",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1791432198000,
+      "tag": "0001_custom_logo",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1791434314491,
+      "tag": "0002_pos_accessories",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1791615913476,
+      "tag": "0003_easy_sway",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1791630500067,
+      "tag": "0004_goofy_giant_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1791630937267,
+      "tag": "0005_fantastic_stark_industries",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1791653917343,
+      "tag": "0006_dry_whirlwind",
+      "breakpoints": true
+    }
+  ]
+}

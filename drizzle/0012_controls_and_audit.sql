@@ -1,0 +1,12 @@
+ALTER TABLE quotes ADD COLUMN valid_until TEXT;
+ALTER TABLE settings ADD COLUMN quote_valid_days INTEGER NOT NULL DEFAULT 7;
+ALTER TABLE products ADD COLUMN cost_cents INTEGER;
+ALTER TABLE payments ADD COLUMN voided_at TEXT;
+ALTER TABLE payments ADD COLUMN void_reason TEXT NOT NULL DEFAULT '';
+ALTER TABLE sales ADD COLUMN voided_at TEXT;
+ALTER TABLE sales ADD COLUMN void_reason TEXT NOT NULL DEFAULT '';
+ALTER TABLE sales ADD COLUMN discount_cents INTEGER NOT NULL DEFAULT 0;
+CREATE TABLE stock_movements (id INTEGER PRIMARY KEY AUTOINCREMENT,product_id INTEGER NOT NULL REFERENCES products(id),delta INTEGER NOT NULL,reason TEXT NOT NULL,note TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL);
+CREATE INDEX idx_stock_movements_product ON stock_movements(product_id,created_at);
+CREATE TABLE audit_log (id INTEGER PRIMARY KEY AUTOINCREMENT,entity TEXT NOT NULL,entity_id INTEGER,action TEXT NOT NULL,detail TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL);
+CREATE INDEX idx_audit_log_created ON audit_log(created_at);

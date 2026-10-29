@@ -1,0 +1,24 @@
+'use client';
+import type {ReactNode} from 'react';
+import {Tabs} from '@heroui/react';
+import {CheckCircle2,Coins,Printer,Receipt} from 'lucide-react';
+import {type BootData,type Currency,type PaymentMethod,type RecordData,money,folio,paymentDate} from './types';
+import {Empty,Modal,type Mutation, type PrintItem} from './ui';
+import {PaymentForm} from './record-form';
+import {methods,paymentLabel} from '@/lib/format';
+import {CashView} from './cash';
+
+export function PaymentsView({data,orders,pending,visiblePayments,search,query,open,setPayOrder,print,cashMode,setCashMode,cashDate,setCashDate,mutate,notify}:{data:BootData;orders:RecordData[];pending:RecordData[];visiblePayments:BootData['payments'];search:(label:string,placeholder:string)=>ReactNode;query:string;open:(record:RecordData,quote?:boolean)=>void;setPayOrder:(id:number|null)=>void;print:(item:PrintItem)=>void;cashMode:'payments'|'cash';setCashMode:(value:'payments'|'cash')=>void;cashDate:string;setCashDate:(value:string)=>void;mutate:(payload:Mutation)=>Promise<unknown>;notify:(message:string)=>void}) {
+ return <Tabs className="payment-tabs" selectedKey={cashMode} onSelectionChange={key=>setCashMode(String(key) as 'payments'|'cash')}>
+  <Tabs.ListContainer className="payment-tabs-container"><Tabs.List aria-label="Cobros y caja" className="payment-tabs-list">
+   <Tabs.Tab id="payments">Cobros<Tabs.Indicator/></Tabs.Tab>
+   <Tabs.Tab id="cash">Caja<Tabs.Indicator/></Tabs.Tab>
+  </Tabs.List></Tabs.ListContainer>
+  <Tabs.Panel id="payments" className="payment-tab-panel"><div className="money-summary">{(['MXN','USD'] as Currency[]).map(c=><div className="money-card" key={c}><span><Coins size={19}/>Pendiente de cobro · {c}</span><strong>{money(orders.filter(r=>r.currency===c).reduce((n,r)=>n+r.dueCents,0),c)}</strong><small>{orders.filter(r=>r.currency===c&&r.dueCents>0).length} órdenes con adeudo</small></div>)}</div><div className="payment-search">{search('Buscar cobros','Cliente, equipo o número de orden')}</div><section className="panel"><div className="section-heading"><h2>Órdenes con adeudo</h2><span>{pending.length} pendientes</span></div>{pending.length?<div className="table-wrap"><table><thead><tr><th>Orden</th><th>Cliente / equipo</th><th className="numeric">Total</th><th className="numeric">Cobrado</th><th className="numeric">Adeudo</th><th/></tr></thead><tbody>{pending.map(r=><tr key={r.id}><td><button className="folio" onClick={()=>open(r)}>{folio(r.id)}</button></td><td><strong>{r.firstName} {r.lastName}</strong><small>{r.brand} {r.model}</small></td><td className="numeric">{money(r.totalCents,r.currency)}</td><td className="numeric">{money(r.paidCents,r.currency)}</td><td className="numeric"><strong className="due">{money(r.dueCents,r.currency)}</strong></td><td><button className="sc-button small secondary" onClick={()=>setPayOrder(r.id)}>Registrar pago</button></td></tr>)}</tbody></table></div>:<Empty icon={CheckCircle2} title={query?'Sin coincidencias':'No hay adeudos pendientes'} description="Los anticipos y pagos se descuentan automáticamente del total."/>}</section><section className="panel payment-history"><div className="section-heading"><h2>Historial de cobros</h2><span>Anticipos y pagos</span></div>{visiblePayments.length?<div className="table-wrap"><table><thead><tr><th>Fecha</th><th>Orden / cliente</th><th>Concepto</th><th>Método</th><th className="numeric">Importe</th><th aria-label="Imprimir"/></tr></thead><tbody>{visiblePayments.map(p=><tr key={p.id}><td>{paymentDate(p,true)}</td><td><button className="folio" onClick={()=>open(orders.find(o=>o.id===p.orderId)!)}>{folio(p.orderId)}</button><small>{p.firstName} {p.lastName}</small></td><td>{paymentLabel(p.kind)}<small>{p.notes}</small></td><td>{methods[p.method]}</td><td className="numeric"><strong className="paid">{money(p.amountCents,p.currency)}</strong></td><td><button className="row-button" aria-label={`Imprimir cobro ${p.id}`} onClick={()=>{const order=orders.find(o=>o.id===p.orderId);if(order)print({type:'payment',payment:p,order});}}><Printer size={17}/></button></td></tr>)}</tbody></table></div>:<Empty icon={Receipt} title="Sin cobros registrados" description="Cada anticipo y pago aparecerá con su fecha y método."/>}</section></Tabs.Panel>
+  <Tabs.Panel id="cash" className="payment-tab-panel"><CashView data={data} date={cashDate} onDateChange={setCashDate} mutate={mutate} notify={notify}/></Tabs.Panel>
+ </Tabs>;
+}
+
+export function PaymentDialog({paying,paymentMethods,mutate,close,saved}:{paying:RecordData;paymentMethods:PaymentMethod[];mutate:(payload:Mutation)=>Promise<{id:number}>;close:()=>void;saved:()=>void}) {
+ return <Modal title="Registrar pago" eyebrow={`${folio(paying.id)} · ${paying.firstName} ${paying.lastName}`} close={close}><PaymentForm order={paying} paymentMethods={paymentMethods} mutate={mutate} close={close} saved={saved}/></Modal>;
+}

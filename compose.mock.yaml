@@ -1,0 +1,107 @@
+# Entorno desechable de demostración: base propia, red privada y puerto solo local.
+# No conecta con OpenClaw ni con la base de Salvacel de trabajo.
+services:
+  mock-postgres:
+    image: postgres:17.6-bookworm
+    container_name: salvacel-demo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: salvacel_demo
+      POSTGRES_USER: salvacel_demo
+      POSTGRES_PASSWORD: mock-only-not-for-production
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - salvacel-demo-data:/var/lib/postgresql/data
+    networks:
+      - demo-isolated
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 15s
+    mem_limit: 512m
+    cpus: 0.75
+
+  mock-app:
+    image: salvacel-local:safe
+    container_name: salvacel-demo
+    restart: unless-stopped
+    depends_on:
+      mock-postgres:
+        condition: service_healthy
+    environment:
+      SALVACEL_HOST: 0.0.0.0
+      PGHOST: mock-postgres
+      PGPORT: "5432"
+      PGDATABASE: salvacel_demo
+      PGUSER: salvacel_demo
+      PGPASSWORD: mock-only-not-for-production
+      PG_POOL_MAX: "5"
+      SALVACEL_AGENT_PROCESSING_ENABLED: "false"
+      SALVACEL_PHOTO_STORAGE_DIR: /tmp/salvacel-demo-photos
+    networks:
+      - demo-isolated
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:8787/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 45s
+    mem_limit: 768m
+    cpus: 1.0
+
+  mock-gateway:
+    image: nginx:1.29.5-alpine
+    container_name: salvacel-demo-loopback
+    restart: unless-stopped
+    depends_on:
+      mock-app:
+        condition: service_healthy
+    user: "101:101"
+    entrypoint:
+      - nginx
+      - -g
+      - daemon off;
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 32
+    mem_limit: 64m
+    cpus: 0.25
+    ports:
+      - "127.0.0.1:8790:8080"
+    networks:
+      - demo-isolated
+      - demo-edge
+    volumes:
+      - ./nginx.mock.conf:/etc/nginx/nginx.conf:ro
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=8m,uid=101,gid=101
+      - /var/cache/nginx:rw,noexec,nosuid,size=8m,uid=101,gid=101
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --output-document=-
+        - http://127.0.0.1:8080/api/health
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 10s
+
+networks:
+  demo-isolated:
+    internal: true
+  demo-edge:
+
+volumes:
+  salvacel-demo-data:
+    name: salvacel-demo-data

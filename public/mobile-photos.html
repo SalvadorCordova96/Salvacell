@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="robots" content="noindex,nofollow,noarchive" />
+    <meta name="color-scheme" content="light" />
+    <title>Fotos del equipo · Salvacel</title>
+    <link rel="stylesheet" href="/mobile-photos.css" />
+    <script src="/mobile-photos.js" defer></script>
+  </head>
+  <body>
+    <main class="mobile-card">
+      <p class="eyebrow">EVIDENCIA DEL TALLER</p>
+      <h1>Fotos del equipo</h1>
+      <p id="intro" class="muted">Este acceso temporal solo permite subir fotos a una orden. No muestra datos del cliente ni otras órdenes.</p>
+      <p id="status" class="mobile-status muted" role="status" aria-live="polite">Validando código temporal…</p>
+      <section id="start" class="start-panel">
+        <p id="device" class="device" hidden></p>
+        <button id="begin" class="button primary" type="button" hidden>Iniciar carga de fotos</button>
+      </section>
+      <section id="upload" class="upload-panel" hidden>
+        <label class="picker">
+          <span>Tomar foto o elegir imágenes</span>
+          <small>JPG, PNG o WebP · hasta 12 MB cada una · máximo 10 por sesión</small>
+          <input id="photos" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" multiple />
+        </label>
+        <div id="queue" class="queue" aria-live="polite"></div>
+        <button id="send" class="button primary" type="button" disabled>Subir fotos seleccionadas</button>
+        <p id="remaining" class="muted"></p>
+      </section>
+      <footer>El código vence pronto y solo puede canjearse una vez.</footer>
+    </main>
+  </body>
+</html>
